@@ -2,7 +2,7 @@
 // Support both Environment Variables (Vercel, Cloud Hosting) and Localhost (WAMP / XAMPP)
 define('DB_HOST', getenv('DB_HOST') ?: (getenv('MYSQLHOST') ?: 'localhost'));
 define('DB_USER', getenv('DB_USER') ?: (getenv('MYSQLUSER') ?: 'root'));
-define('DB_PASS', getenv('DB_PASS') ?: (getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : ''));
+define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : (getenv('MYSQLPASSWORD') !== false ? getenv('MYSQLPASSWORD') : ''));
 define('DB_NAME', getenv('DB_NAME') ?: (getenv('MYSQLDATABASE') ?: 'library_db'));
 define('DB_PORT', getenv('DB_PORT') ?: (getenv('MYSQLPORT') ?: '3306'));
 
@@ -22,12 +22,21 @@ if (!defined('BASE_URL')) {
 }
 
 try {
+    $pdoOptions = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+    ];
+
+    $caFile = __DIR__ . '/../cacert.pem';
+    if (file_exists($caFile)) {
+        $pdoOptions[PDO::MYSQL_ATTR_SSL_CA] = $caFile;
+    }
+
     $pdo = new PDO(
         'mysql:host='.DB_HOST.';port='.DB_PORT.';dbname='.DB_NAME.';charset=utf8mb4',
-        DB_USER, DB_PASS
+        DB_USER, DB_PASS, $pdoOptions
     );
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log('DB Connection failed: ' . $e->getMessage());
     die('
