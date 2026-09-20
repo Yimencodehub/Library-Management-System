@@ -3,10 +3,13 @@
  * Vercel Serverless Gateway Router for Library Management System
  */
 
+$rootDir = dirname(__DIR__);
+
+// Add project root and include directories to PHP include_path
+set_include_path(get_include_path() . PATH_SEPARATOR . $rootDir . PATH_SEPARATOR . $rootDir . '/includes' . PATH_SEPARATOR . $rootDir . '/config');
+
 $requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $requestUri = trim($requestUri, '/');
-
-$rootDir = dirname(__DIR__);
 
 // If root URL accessed
 if ($requestUri === '' || $requestUri === 'index.php') {
@@ -18,6 +21,7 @@ if ($requestUri === '' || $requestUri === 'index.php') {
         elseif ($role === 'staff') { header('Location: /staff/dashboard.php'); exit; }
         elseif ($role === 'member') { header('Location: /member/dashboard.php'); exit; }
     }
+    chdir($rootDir . '/guest');
     require $rootDir . '/guest/index.php';
     exit;
 }
@@ -39,22 +43,22 @@ if (!file_exists($targetFile) && file_exists($targetFile . '.php')) {
     $targetFile .= '.php';
 }
 
-// Execute file if exists
+// Execute PHP file if exists
 if (file_exists($targetFile) && is_file($targetFile) && pathinfo($targetFile, PATHINFO_EXTENSION) === 'php') {
-    // Change working directory to target script directory so relative requires like '../config/db.php' work seamlessly
     chdir(dirname($targetFile));
     require $targetFile;
     exit;
 }
 
 // Static assets fallback
-$ext = pathinfo($targetFile, PATHINFO_EXTENSION);
+$ext = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
 $mimeTypes = [
     'css' => 'text/css',
     'js' => 'application/javascript',
     'png' => 'image/png',
     'jpg' => 'image/jpeg',
     'jpeg' => 'image/jpeg',
+    'webp' => 'image/webp',
     'svg' => 'image/svg+xml',
     'ico' => 'image/x-icon',
 ];
