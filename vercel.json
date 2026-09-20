@@ -24,6 +24,30 @@
       "dest": "/uploads/$1"
     },
     {
+      "src": "/",
+      "dest": "/index.php"
+    },
+    {
+      "src": "/guest/?",
+      "dest": "/guest/index.php"
+    },
+    {
+      "src": "/admin/?",
+      "dest": "/admin/dashboard.php"
+    },
+    {
+      "src": "/member/?",
+      "dest": "/member/dashboard.php"
+    },
+    {
+      "src": "/staff/?",
+      "dest": "/staff/dashboard.php"
+    },
+    {
+      "src": "/superadmin/?",
+      "dest": "/superadmin/dashboard.php"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }
